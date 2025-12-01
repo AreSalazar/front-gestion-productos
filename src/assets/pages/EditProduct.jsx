@@ -11,10 +11,12 @@ export default function EditProduct() {
         description: "",
         price: "",
         stock: "",
+        image: null,
     });
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [currentImage, setCurrentImage] = useState(null);
 
     //Cargando el producto
     useEffect(() => {
@@ -29,7 +31,10 @@ export default function EditProduct() {
                     description: p.description,
                     price: p.price,
                     stock: p.stock,
+                    image: null,
                 });
+
+                setCurrentImage(p.image);//guardar ruta de la img existente
 
             } catch (err) {
                 setError("No se pudo cargar el producto");
@@ -39,6 +44,7 @@ export default function EditProduct() {
         fetchProduct();
     }, [id]);
 
+    //Handle para los imputs normales
     const handleChange = (e) => {
         setForm({
             ...form,
@@ -46,16 +52,34 @@ export default function EditProduct() {
         });
     };
 
+    //Y handle para la imagen
+    const handleFileChange = (e) => {
+        setForm({
+            ...form,
+            image: e.target.files[0],
+        });
+    };
+
+
     //EDITAR (PUT)--------------------------
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            await api.put(`/products/${id}`, form);
+            const formData = new FormData();//FormData() permite mezclar campos de texto y archivos
+            formData.append("name", form.name);
+            formData.append("description", form.description);
+            formData.append("price", form.price);
+            formData.append("stock", form.stock);
+
+            if (form.image) {
+                formData.append("image", form.image);
+            }
+
+            await api.post(`/products/${id}?_method=PUT`, formData);
 
             alert("Producto actualizado correctamente!");
-
             navigate(`/products/${id}`);
 
         } catch (err) {
@@ -120,6 +144,31 @@ export default function EditProduct() {
                         onChange={handleChange}
                     />
                 </div>
+
+                <div className="mb-3">
+                    <label className="form-label fw-semibold">Imagen</label>
+                    <input
+                        type="file"
+                        className="form-control"
+                        onChange={handleFileChange}
+                        accept="image/*"
+                    />
+                </div>
+
+                {currentImage && (
+                    <div className="mb-3">
+                        <p className="fw-semibold">Imagen:</p>
+                        <img
+                            src={`http://127.0.0.1:8000/storage/${currentImage}`}
+                            alt="Producto"
+                            style={{
+                                width: "200px",
+                                borderRadius: "10px",
+                                border: "1px solid #ccc",
+                            }}
+                        />
+                    </div>
+                )}
 
                 <div className="d-flex gap-3 mt-3">
 
