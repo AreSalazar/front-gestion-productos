@@ -35,10 +35,10 @@ export default function Products() {
 
   // filtro de búsqueda
   const filteredProducts = products.filter(p =>
-  (p.name && p.name.toLowerCase().includes(search.toLowerCase())) ||
-  (p.category && p.category.toLowerCase().includes(search.toLowerCase())) ||
-  (p.description && p.description.toLowerCase().includes(search.toLowerCase()))
-);
+    (p.name && p.name.toLowerCase().includes(search.toLowerCase())) ||
+    (p.category && p.category.toLowerCase().includes(search.toLowerCase())) ||
+    (p.description && p.description.toLowerCase().includes(search.toLowerCase()))
+  );
 
 
   if (loading) {
@@ -58,6 +58,13 @@ export default function Products() {
         <p className="text-secondary mt-2">
           Encuentra los mejores productos tecnológicos al mejor precio
         </p>
+      </div>
+
+      {/*Botón de crear un producto*/}
+      <div className="text-center mb-4">
+        <a href="/productos/crear" className="btn btn-primary btn-lg">
+        Añadir Producto
+        </a>
       </div>
 
       <div className="container py-5">
