@@ -77,7 +77,7 @@ export default function ProductDetail() {
           <div className="card border-0 shadow-lg p-4 rounded-4">
 
             <h2 className="mb-4 fw-bold text-center">
-              🛍️ Detalle del producto
+              🛍️ Detalles específicos
             </h2>
 
             <div className="row g-4 align-items-center">
