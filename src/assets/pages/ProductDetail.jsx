@@ -10,6 +10,23 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const handleDelete = async () => {
+    const confirmDelete = confirm("¿Seguro que deseas desactivar este producto?");
+
+    if (!confirmDelete) return;
+
+    try {
+      await api.delete(`/products/${product.id}`);
+
+      alert("Producto desactivado correctamente.");
+      navigate("/productos");
+
+    } catch (err) {
+      console.log(err);
+      alert("Error al desactivar el producto.");
+    }
+  };
+
   useEffect(() => {
     const getProduct = async () => {
       try {
@@ -99,8 +116,23 @@ export default function ProductDetail() {
                     Añadir al carrito
                   </button>
 
+                  {/*Botones agregados temporalmente*/}
                   <button
-                    onClick={() => navigate(-1)}
+                    onClick={() => navigate(`/productos/editar/${product.id}`)}
+                    className="btn btn-warning px-4 py-2 fw-semibold"
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    onClick={handleDelete}
+                    className="btn btn-danger px-4 py-2 fw-semibold"
+                  >
+                    Eliminar
+                  </button>
+
+                  <button
+                    onClick={() => navigate(`/productos`)}
                     className="btn btn-outline-primary px-4 py-2 fw-semibold"
                   >
                     Volver

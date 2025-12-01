@@ -5,6 +5,7 @@ import Navbar from "./assets/components/Navbar.jsx";
 import Footer from "./assets/components/Footer.jsx";
 import ProductDetail from "./assets/pages/ProductDetail";
 import CreateProduct from "./assets/pages/CreateProduct";
+import EditProduct from "./assets/pages/EditProduct";
 
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/productos" element={<Products />} />
         <Route path="/productos/crear" element={<CreateProduct/>}/>
         <Route path="/products/:id" element={<ProductDetail />}/>
+        <Route path="/productos/editar/:id" element={<EditProduct />} />
 
       </Routes>
 
