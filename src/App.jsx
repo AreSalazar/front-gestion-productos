@@ -12,13 +12,14 @@ export default function App() {
   return (
     <Router>
       <Navbar />
+
       <Routes>
         <Route path="/" element={<Products />} />
         <Route path="/productos" element={<Products />} />
-        <Route path="/productos/crear" element={<CreateProduct/>}/>
-        <Route path="/products/:id" element={<ProductDetail />}/>
+        <Route path="/productos/crear" element={<CreateProduct />} />
+        <Route path="/productos/detalle/:id" element={<ProductDetail />} />
         <Route path="/productos/editar/:id" element={<EditProduct />} />
-
+        <Route path="/products/:id" element={<ProductDetail />} />
       </Routes>
 
       <Footer />

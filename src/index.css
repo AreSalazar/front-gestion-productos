@@ -64,20 +64,21 @@
   transition: all 0.4s ease;
 }
 
-.product-card:hover .overlay {
-  opacity: 1;
-}
-
 .btn-hover {
   transition: all 0.3s ease;
   transform: translateY(20px);
   opacity: 0;
 }
 
-.product-card:hover .btn-hover {
-  transform: translateY(0);
-  opacity: 1;
+.product-card {
+  transition: all 0.3s ease;
 }
+
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
 
 /* Animación de entrada */
 @keyframes fadeIn {

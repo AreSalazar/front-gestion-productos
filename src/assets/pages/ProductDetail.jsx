@@ -1,154 +1,212 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import api from "../services/api";
+import { useParams, Link, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const location = useLocation();
 
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [product, setProduct] = useState(location.state?.product || null);
+  const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
 
-  const handleDelete = async () => {
-    const confirmDelete = confirm("¿Seguro que deseas desactivar este producto?");
+  const [comment, setComment] = useState("");
+  const [commentsList, setCommentsList] = useState([]);
+
+  // SI NO HAY USUARIO → ponemos uno ficticio
+  let currentUser = JSON.parse(localStorage.getItem("user"));
+  if (!currentUser) {
+    currentUser = {
+      id: 999,
+      name: "Invitado"
+    };
+  }
+
+  const imageUrl = product?.image
+    ? `http://localhost:8000/storage/${product.image}`
+    : "https://via.placeholder.com/500x300?text=Producto";
+
+  useEffect(() => {
+    if (!product) {
+      axios
+        .get(`http://localhost:8000/api/products/${id}`)
+        .then((res) => setProduct(res.data))
+        .catch((err) => console.error("Error cargando producto:", err));
+    }
+  }, [id, product]);
+
+  useEffect(() => {
+    const savedRating = localStorage.getItem(`rating_${id}`);
+    const savedComments = localStorage.getItem(`comments_${id}`);
+
+    if (savedRating) setRating(parseInt(savedRating));
+    if (savedComments) setCommentsList(JSON.parse(savedComments));
+  }, [id]);
+
+  const handleRating = (value) => {
+    setRating(value);
+    localStorage.setItem(`rating_${id}`, value);
+  };
+
+  const handleAddComment = () => {
+    if (comment.trim() === "") return;
+
+    const newComment = {
+      user: currentUser.name,
+      user_id: currentUser.id,
+      text: comment,
+      date: new Date().toLocaleDateString()
+    };
+
+    const newComments = [newComment, ...commentsList];
+    setCommentsList(newComments);
+    localStorage.setItem(`comments_${id}`, JSON.stringify(newComments));
+    setComment("");
+  };
+
+  const handleDelete = (index) => {
+    const confirmDelete = window.confirm(
+      `¿Seguro que quieres eliminar este comentario?\n\n"${commentsList[index].text}"`
+    );
 
     if (!confirmDelete) return;
 
-    try {
-      await api.delete(`/products/${product.id}`);
-
-      alert("Producto desactivado correctamente.");
-      navigate("/productos");
-
-    } catch (err) {
-      console.log(err);
-      alert("Error al desactivar el producto.");
-    }
+    const updated = commentsList.filter((_, i) => i !== index);
+    setCommentsList(updated);
+    localStorage.setItem(`comments_${id}`, JSON.stringify(updated));
   };
 
-  useEffect(() => {
-    const getProduct = async () => {
-      try {
-        const response = await api.get(`/products/${id}`);
+  const handleEdit = (index) => {
+    const currentText = commentsList[index].text;
 
-        // Soporta diferentes estructuras de respuesta
-        if (response.data?.data) {
-          setProduct(response.data.data);
-        } else if (response.data?.product) {
-          setProduct(response.data.product);
-        } else {
-          setProduct(response.data);
-        }
+    const newText = window.prompt(
+      `Estás editando este comentario:\n\n"${currentText}"\n\nEscribe el nuevo texto abajo:`,
+      currentText
+    );
 
-      } catch (err) {
-        setError("Error al cargar el producto");
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!newText) return;
 
-    getProduct();
-  }, [id]);
+    const updated = [...commentsList];
+    updated[index].text = newText;
+    setCommentsList(updated);
+    localStorage.setItem(`comments_${id}`, JSON.stringify(updated));
+  };
 
-  if (loading) {
-    return <p className="text-center fs-4 mt-5">Cargando producto...</p>;
-  }
-
-  if (error) {
-    return <p className="text-center text-danger fs-5 mt-5">{error}</p>;
-  }
-
-  if (!product) {
-    return <p className="text-center mt-5">Producto no encontrado</p>;
-  }
-
-  const imageUrl = product.image
-    ? `http://127.0.0.1:8000/storage/${product.image}`
-    : "https://via.placeholder.com/500x350?text=Producto";
+  if (!product)
+    return <p className="text-center mt-5">Cargando producto...</p>;
 
   return (
-    <div className="container py-5">
+    <div className="container my-5">
+      <Link to="/" className="btn btn-outline-secondary mb-4">
+        ← Volver
+      </Link>
 
-      <div className="row justify-content-center">
-
-        <div className="col-lg-10">
-
-          <div className="card border-0 shadow-lg p-4 rounded-4">
-
-            <h2 className="mb-4 fw-bold text-center">
-              🛍️ Detalles específicos
-            </h2>
-
-            <div className="row g-4 align-items-center">
-
-              {/* IMAGEN */}
-              <div className="col-md-6">
-
-                <div className="overflow-hidden rounded-4 product-detail-img">
-                  <img
-                    src={imageUrl}
-                    className="img-fluid w-100"
-                    alt={product.name}
-                  />
-                </div>
-
-              </div>
-
-              {/* INFO */}
-              <div className="col-md-6 d-flex flex-column justify-content-between">
-
-                <div>
-                  <h3 className="fw-bold">{product.name}</h3>
-
-                  <p className="text-muted mt-3">
-                    {product.description}
-                  </p>
-
-                  <p className="display-6 fw-bold text-primary mt-4">
-                    ${product.price}
-                  </p>
-                </div>
-
-                <div className="d-flex gap-3 mt-4">
-
-                  <button className="btn btn-success px-4 py-2 fw-semibold">
-                    Añadir al carrito
-                  </button>
-
-                  {/*Botones agregados temporalmente*/}
-                  <button
-                    onClick={() => navigate(`/productos/editar/${product.id}`)}
-                    className="btn btn-warning px-4 py-2 fw-semibold"
-                  >
-                    Editar
-                  </button>
-
-                  <button
-                    onClick={handleDelete}
-                    className="btn btn-danger px-4 py-2 fw-semibold"
-                  >
-                    Eliminar
-                  </button>
-
-                  <button
-                    onClick={() => navigate(`/productos`)}
-                    className="btn btn-outline-primary px-4 py-2 fw-semibold"
-                  >
-                    Volver
-                  </button>
-
-                </div>
-
-              </div>
-            </div>
-
-          </div>
-
+      <div className="row g-5">
+        <div className="col-md-6">
+          <img
+            src={imageUrl}
+            className="img-fluid rounded shadow"
+            alt={product.name}
+          />
         </div>
 
-      </div>
+        <div className="col-md-6">
+          <h2 className="fw-bold">{product.name}</h2>
+          <p className="text-muted">{product.description}</p>
+          <p className="text-success">Stock disponible: {product.stock}</p>
 
+          <h3 className="text-primary fw-bold mb-3">
+            ${product.price}
+          </h3>
+
+          {/* ESTRELLAS */}
+          <div className="mb-4">
+            <h5>Califica este producto</h5>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span
+                key={star}
+                style={{
+                  cursor: "pointer",
+                  fontSize: "28px",
+                  color:
+                    (hover || rating) >= star ? "#ffc107" : "#e4e5e9"
+                }}
+                onClick={() => handleRating(star)}
+                onMouseEnter={() => setHover(star)}
+                onMouseLeave={() => setHover(0)}
+              >
+                ★
+              </span>
+            ))}
+            <span className="ms-2 text-muted">({rating}/5)</span>
+          </div>
+
+          {/* AGREGAR COMENTARIO */}
+          <div className="mb-4">
+            <h5>Escribir opinión</h5>
+
+            <textarea
+              className="form-control mb-2"
+              rows="3"
+              placeholder="Escribe tu comentario..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
+
+            <button
+              className="btn btn-primary w-100"
+              onClick={handleAddComment}
+            >
+              Publicar comentario
+            </button>
+          </div>
+
+          {/* LISTA DE COMENTARIOS */}
+          {commentsList.length > 0 && (
+            <div className="mt-4">
+              <h5 className="fw-bold">
+                Opiniones de clientes ({commentsList.length})
+              </h5>
+
+              {commentsList.map((c, index) => (
+                <div
+                  key={index}
+                  className="border rounded p-3 mb-3 bg-light"
+                >
+                  <strong>{c.user}</strong>
+                  <small className="text-muted d-block">
+                    {c.date}
+                  </small>
+
+                  <p className="mt-2 mb-2">{c.text}</p>
+
+                  {c.user_id === currentUser.id && (
+                    <div>
+                      <button
+                        className="btn btn-sm btn-warning me-2"
+                        onClick={() => handleEdit(index)}
+                      >
+                        Editar
+                      </button>
+
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleDelete(index)}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <button className="btn btn-dark w-100 mt-4">
+            Añadir al carrito 🛒
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
