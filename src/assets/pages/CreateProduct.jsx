@@ -30,7 +30,7 @@ export default function CreateProduct() {
 
         //Validaciones
         const maxSizeMB = 4;
-        if (file.size / 1024 / 1024 > maxSizeMB) {
+        if (file.size/1024/1024> maxSizeMB) {
             setError(`La imagen debe ser menor a ${maxSizeMB} MB`);
             return;
         }
@@ -48,6 +48,32 @@ export default function CreateProduct() {
         e.preventDefault();
         setLoading(true);
         setError("");
+
+        //Validaciones-------
+        if (!form.name.trim()) {
+            return alert("El nombre es obligatorio");
+        }
+        if (!form.description.trim()) {
+            return alert("La descripción es obligatoria");
+        }
+        // Precio: no negativo
+        if (form.price === "" || isNaN(form.price)) {
+            return alert("El precio no es válido");
+        }
+        if (parseFloat(form.price) < 0) {
+            return alert("El precio no puede ser negativo");
+        }
+        //Stock entero y no negativo
+        if (form.stock === "" || isNaN(form.stock)) {
+            return alert("El stock no es válido");
+        }
+        if (!Number.isInteger(Number(form.stock))) {
+            return alert("El stock debe ser un número entero");
+        }
+        if (parseInt(form.stock) < 0) {
+            return alert("El stock no puede ser negativo");
+        }
+        //-------------------------
 
         try {
             const formData = new FormData();//FormData() permite mezclar campos de texto y archivos
@@ -102,13 +128,30 @@ export default function CreateProduct() {
                 {/*Precio*/}
                 <div className="mb-3">
                     <label className="form-label fw-semibold">Precio</label>
-                    <input type="number" name="price" className="form-control" value={form.price} onChange={handleChange} required />
+                    <input type="text" name="price" className="form-control" value={form.price}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            //Permite solo 2 decimales
+                            if (/^\d*\.?\d{0,2}$/.test(value)) {
+                                setForm({ ...form, price: value });
+                            }
+                        }}
+                        placeholder="0.00"
+                        required />
                 </div>
 
                 {/*Stock*/}
                 <div className="mb-3">
                     <label className="form-label fw-semibold">Stock</label>
-                    <input type="number" name="stock" className="form-control" value={form.stock} onChange={handleChange} />
+                    <input type="number" name="stock" className="form-control" value={form.stock}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            //Permite solo números enteros
+                            if (/^\d*$/.test(value)) {
+                                setForm({ ...form, stock: value });
+                            }
+                        }}
+                        required />
                 </div>
 
                 {/*Imagen*/}
