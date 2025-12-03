@@ -25,8 +25,26 @@ export default function Navbar() {
           <ul className="navbar-nav ms-auto gap-3 text-center align-items-lg-center">
             {isAuthenticated ? (
               <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/productos">Productos</Link>
+                <li className="nav-item dropdown">
+                  <Link
+                    className="nav-link dropdown-toggle" to="#" id="productsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                  >
+                    Productos
+                  </Link>
+
+                  <ul className="dropdown-menu dropdown-menu-end dropdown-menu-dark border-0 shadow">
+                    <li>
+                      <Link className="dropdown-item text-light" to="/productos">
+                        Ver productos
+                      </Link>
+                    </li>
+
+                    <li>
+                      <Link className="dropdown-item text-light" to="/productos/crear">
+                        Agregar producto
+                      </Link>
+                    </li>
+                  </ul>
                 </li>
                 <li className="nav-item">
                   <span className="nav-link text-light">
