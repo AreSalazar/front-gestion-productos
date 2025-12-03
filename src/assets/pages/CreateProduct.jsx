@@ -28,7 +28,7 @@ export default function CreateProduct() {
         const file = e.target.files[0];
         if (!file) return;
 
-        //Validaciones
+        //Validaciones para imagen
         const maxSizeMB = 4;
         if (file.size/1024/1024> maxSizeMB) {
             setError(`La imagen debe ser menor a ${maxSizeMB} MB`);
@@ -41,39 +41,13 @@ export default function CreateProduct() {
 
         setError("");
         setImage(file);
-        setPreview(URL.createObjectURL(file)); //preview local
+        setPreview(URL.createObjectURL(file)); //preview
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError("");
-
-        //Validaciones-------
-        if (!form.name.trim()) {
-            return alert("El nombre es obligatorio");
-        }
-        if (!form.description.trim()) {
-            return alert("La descripción es obligatoria");
-        }
-        // Precio: no negativo
-        if (form.price === "" || isNaN(form.price)) {
-            return alert("El precio no es válido");
-        }
-        if (parseFloat(form.price) < 0) {
-            return alert("El precio no puede ser negativo");
-        }
-        //Stock entero y no negativo
-        if (form.stock === "" || isNaN(form.stock)) {
-            return alert("El stock no es válido");
-        }
-        if (!Number.isInteger(Number(form.stock))) {
-            return alert("El stock debe ser un número entero");
-        }
-        if (parseInt(form.stock) < 0) {
-            return alert("El stock no puede ser negativo");
-        }
-        //-------------------------
 
         try {
             const formData = new FormData();//FormData() permite mezclar campos de texto y archivos
