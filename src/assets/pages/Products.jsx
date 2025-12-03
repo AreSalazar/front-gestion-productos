@@ -135,13 +135,6 @@ if (Array.isArray(response.data)) {
         </p>
       </div>
 
-      {/*Botón de crear un producto*/}
-      <div className="text-center mb-4">
-        <a href="/productos/crear" className="btn btn-primary btn-lg">
-        Añadir Producto
-        </a>
-      </div>
-
       <div className="container py-5">
 
         {/* Buscador */}
