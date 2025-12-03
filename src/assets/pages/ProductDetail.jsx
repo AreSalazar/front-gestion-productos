@@ -1,4 +1,4 @@
-import { useParams, Link, useLocation } from "react-router-dom";
+import { useParams, Link, useLocation,useNavigate} from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
@@ -7,13 +7,67 @@ import ReviewForm from "../components/ReviewForm";
 
 export default function ProductDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const location = useLocation();
 
   const [product, setProduct] = useState(location.state?.product || null);
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [editingReview, setEditingReview] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleDelete = async () => {
+    const confirmDelete = confirm("¿Seguro que deseas desactivar este producto?");
+
+    if (!confirmDelete) return;
+
+    try {
+      await api.delete(`/products/${product.id}`);
+
+      alert("Producto desactivado correctamente.");
+      navigate("/productos");
+
+    } catch (err) {
+      console.log(err);
+      alert("Error al desactivar el producto.");
+    }
+  };
+
+  useEffect(() => {
+    const getProduct = async () => {
+      try {
+        const response = await api.get(`/products/${id}`);
+
+        // Soporta diferentes estructuras de respuesta
+        if (response.data?.data) {
+          setProduct(response.data.data);
+        } else if (response.data?.product) {
+          setProduct(response.data.product);
+        } else {
+          setProduct(response.data);
+        }
+
+      } catch (err) {
+        setError("Error al cargar el producto");
+      } finally {
+        setLoading(false);
+      }
+    };
+    getProduct();
+  }, [id]);
+  if (loading) {
+    return <p className="text-center fs-4 mt-5">Cargando producto...</p>;
+  }
+
+  if (error) {
+    return <p className="text-center text-danger fs-5 mt-5">{error}</p>;
+  }
+
+  if (!product) {
+    return <p className="text-center mt-5">Producto no encontrado</p>;
+  }
+
   // SI NO HAY USUARIO → ponemos uno ficticio
   let currentUser = JSON.parse(localStorage.getItem("user"));
   if (!currentUser) {
@@ -27,44 +81,89 @@ export default function ProductDetail() {
     ? `http://localhost:8000/storage/${product.image}`
     : "https://via.placeholder.com/500x300?text=Producto";
 
-  useEffect(() => {
-    if (!product) {
-      api
-        .get(`http://localhost:8000/api/products/${id}`)
-        .then((res) => setProduct(res.data))
-        .catch((err) => console.error("Error cargando producto:", err));
-    }
-  }, [id, product]);
 
 
-  if (!product)
-    return <p className="text-center mt-5">Cargando producto...</p>;
-
-  return (
-    <div className="container my-5">
+ return (
+    <div className="container py-5">
       <Link to="/" className="btn btn-outline-secondary mb-4">
         ← Volver
       </Link>
 
-      <div className="row g-5">
-        <div className="col-md-6">
-          <img
-            src={imageUrl}
-            className="img-fluid rounded shadow"
-            alt={product.name}
-          />
-        </div>
+      <div className="row justify-content-center">
 
-        <div className="col-md-6">
-          <h2 className="fw-bold">{product.name}</h2>
-          <p className="text-muted">{product.description}</p>
-          <p className="text-success">Stock disponible: {product.stock}</p>
+        <div className="col-lg-10">
 
-          <h3 className="text-primary fw-bold mb-3">
-            ${product.price}
-          </h3>
+          <div className="card border-0 shadow-lg p-4 rounded-4">
 
-          {/* FORMULARIO DE RESEÑA */}
+            <h2 className="mb-4 fw-bold text-center">
+              🛍️ Detalles específicos
+            </h2>
+
+            <div className="row g-4 align-items-center">
+
+              {/* IMAGEN */}
+              <div className="col-md-6">
+
+                <div className="overflow-hidden rounded-4 product-detail-img">
+                  <img
+                    src={imageUrl}
+                    className="img-fluid w-100"
+                    alt={product.name}
+                  />
+                </div>
+
+              </div>
+
+              {/* INFO */}
+              <div className="col-md-6 d-flex flex-column justify-content-between">
+
+                <div>
+                  <h3 className="fw-bold">{product.name}</h3>
+
+                  <p className="text-muted mt-3">
+                    {product.description}
+                  </p>
+                  <p className="text-success">Stock disponible: {product.stock}</p>
+                  <p className="display-6 fw-bold text-primary mt-4">
+                    ${product.price}
+                  </p>
+                </div>
+
+                <div className="d-flex gap-3 mt-4">
+
+                  <button className="btn btn-success px-4 py-2 fw-semibold">
+                    Añadir al carrito
+                  </button>
+
+                  {/*Botones agregados temporalmente*/}
+                  <button
+                    onClick={() => navigate(`/productos/editar/${product.id}`)}
+                    className="btn btn-warning px-4 py-2 fw-semibold"
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    onClick={handleDelete}
+                    className="btn btn-danger px-4 py-2 fw-semibold"
+                  >
+                    Eliminar
+                  </button>
+
+                  <button
+                    onClick={() => navigate(`/productos`)}
+                    className="btn btn-outline-primary px-4 py-2 fw-semibold"
+                  >
+                    Volver
+                  </button>
+
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+                    {/* FORMULARIO DE RESEÑA */}
           <ReviewForm 
           productId={id} 
           editingReview={editingReview}
@@ -80,12 +179,11 @@ export default function ProductDetail() {
           onEdit={(review) => setEditingReview(review)} 
           />
 
-
-          <button className="btn btn-dark w-100 mt-4">
-            Añadir al carrito 🛒
-          </button>
         </div>
+
       </div>
+
     </div>
   );
 }
+

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const token = "5|hMOdcseoZfIf9pu20BVe8Bsln69ozHx8xcLKD0vS38ee64e8" //colocar token temporalmente
+const token = "13|hC8PLxzHxw74sJ6Qe9Tx1IdRhJBTLWiuoeInfSQM4fe605c2" //colocar token temporalmente
 
 const api = axios.create({
   baseURL: "http://127.0.0.1:8000/api",
