@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import RatingStars from "./RatingStars";
 
 export default function ProductCard({ product }) {
   if (!product) return null;
@@ -37,7 +38,9 @@ export default function ProductCard({ product }) {
 
         <div>
           <h5 className="card-title fw-bold">{product.name}</h5>
+          <RatingStars value={Math.round(product.reviews_avg_rating)} />
 
+          {/* DESCRIPCIÓN */}
           <p className="card-text text-muted small">
             {product.description
               ? product.description.substring(0, 60) + "..."

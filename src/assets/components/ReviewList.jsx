@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import RatingStars from './RatingStars';
 
+
 export default function ReviewList({ productId, onEdit, refreshKey }) {
 
   const [reviews, setReviews] = useState([]);
   const [average, setAverage] = useState(0);
+  
 
   useEffect(() => {
     loadReviews();
@@ -61,6 +63,7 @@ export default function ReviewList({ productId, onEdit, refreshKey }) {
       {reviews.map(review => (
         <div className="card my-3 shadow-sm" key={review.id}>
           <div className="card-body">
+            <p><strong>{review.user.name}</strong></p>
 
             <RatingStars value={review.rating} />
 
