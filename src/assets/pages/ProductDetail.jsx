@@ -1,14 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, Link, useLocation,useNavigate} from "react-router-dom";
+import { useEffect, useState } from "react";
 import api from "../services/api";
+
+import ReviewList from "../components/ReviewList";
+import ReviewForm from "../components/ReviewForm";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState(location.state?.product || null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [editingReview, setEditingReview] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleDelete = async () => {
     const confirmDelete = confirm("¿Seguro que deseas desactivar este producto?");
@@ -47,10 +54,8 @@ export default function ProductDetail() {
         setLoading(false);
       }
     };
-
     getProduct();
   }, [id]);
-
   if (loading) {
     return <p className="text-center fs-4 mt-5">Cargando producto...</p>;
   }
@@ -63,12 +68,26 @@ export default function ProductDetail() {
     return <p className="text-center mt-5">Producto no encontrado</p>;
   }
 
-  const imageUrl = product.image
-    ? `http://127.0.0.1:8000/storage/${product.image}`
-    : "https://via.placeholder.com/500x350?text=Producto";
+  // SI NO HAY USUARIO → ponemos uno ficticio
+  let currentUser = JSON.parse(localStorage.getItem("user"));
+  if (!currentUser) {
+    currentUser = {
+      id: 999,
+      name: "Invitado"
+    };
+  }
 
-  return (
+  const imageUrl = product?.image
+    ? `http://localhost:8000/storage/${product.image}`
+    : "https://via.placeholder.com/500x300?text=Producto";
+
+
+
+ return (
     <div className="container py-5">
+      <Link to="/" className="btn btn-outline-secondary mb-4">
+        ← Volver
+      </Link>
 
       <div className="row justify-content-center">
 
@@ -104,7 +123,7 @@ export default function ProductDetail() {
                   <p className="text-muted mt-3">
                     {product.description}
                   </p>
-
+                  <p className="text-success">Stock disponible: {product.stock}</p>
                   <p className="display-6 fw-bold text-primary mt-4">
                     ${product.price}
                   </p>
@@ -131,19 +150,27 @@ export default function ProductDetail() {
                     Eliminar
                   </button>
 
-                  <button
-                    onClick={() => navigate(`/productos`)}
-                    className="btn btn-outline-primary px-4 py-2 fw-semibold"
-                  >
-                    Volver
-                  </button>
-
                 </div>
 
               </div>
             </div>
 
           </div>
+                    {/* FORMULARIO DE RESEÑA */}
+          <ReviewForm 
+          productId={id} 
+          editingReview={editingReview}
+          onFinish={() => {
+            setEditingReview(null);
+            setRefreshKey(oldKey => oldKey + 1);
+          }} 
+          />
+          {/* LISTA DE RESEÑAS */}
+          <ReviewList 
+          productId={id} 
+          refreshKey={refreshKey}
+          onEdit={(review) => setEditingReview(review)} 
+          />
 
         </div>
 
@@ -152,3 +179,4 @@ export default function ProductDetail() {
     </div>
   );
 }
+

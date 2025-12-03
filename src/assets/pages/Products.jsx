@@ -12,6 +12,81 @@ export default function Products() {
     const getProducts = async () => {
       try {
         const response = await api.get("/products");
+        // Obtener promedio de estrellas por producto
+let productsWithRating = [];
+
+if (Array.isArray(response.data)) {
+  productsWithRating = await Promise.all(
+    response.data.map(async (product) => {
+      try {
+        const avg = await api.get(`/products/${product.id}/reviews/average`);
+
+        return {
+          ...product,
+          average_rating: avg.data.average || 0
+        };
+
+      } catch {
+        return {
+          ...product,
+          average_rating: 0
+        };
+      }
+    })
+  );
+
+  setProducts(productsWithRating);
+
+} else if (Array.isArray(response.data.data)) {
+
+  productsWithRating = await Promise.all(
+    response.data.data.map(async (product) => {
+      try {
+        const avg = await api.get(`/products/${product.id}/reviews/average`);
+
+        return {
+          ...product,
+          average_rating: avg.data.average || 0
+        };
+
+      } catch {
+        return {
+          ...product,
+          average_rating: 0
+        };
+      }
+    })
+  );
+
+  setProducts(productsWithRating);
+
+} else if (Array.isArray(response.data.products)) {
+
+  productsWithRating = await Promise.all(
+    response.data.products.map(async (product) => {
+      try {
+        const avg = await api.get(`/products/${product.id}/reviews/average`);
+
+        return {
+          ...product,
+          average_rating: avg.data.average || 0
+        };
+
+      } catch {
+        return {
+          ...product,
+          average_rating: 0
+        };
+      }
+    })
+  );
+
+  setProducts(productsWithRating);
+
+} else {
+  setProducts([]);
+}
+
 
         if (Array.isArray(response.data)) {
           setProducts(response.data);
