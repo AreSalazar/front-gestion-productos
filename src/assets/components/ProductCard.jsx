@@ -6,7 +6,7 @@ export default function ProductCard({ product }) {
 
   const imageUrl = product.image
     ? `http://127.0.0.1:8000/storage/${product.image}`
-    : "https://via.placeholder.com/300x200?text=Sin+Imagen";
+    : "https://www.shutterstock.com/image-vector/missing-picture-page-website-design-600nw-1552421075.jpg";
 
   const stock = product.stock ?? 0;
 
