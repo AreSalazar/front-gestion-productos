@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import RatingStars from './RatingStars';
 
-export default function ReviewList({ productId, onEdit }) {
+export default function ReviewList({ productId, onEdit, refreshKey }) {
 
   const [reviews, setReviews] = useState([]);
   const [average, setAverage] = useState(0);
@@ -10,7 +10,7 @@ export default function ReviewList({ productId, onEdit }) {
   useEffect(() => {
     loadReviews();
     loadAverage();
-  }, []);
+  }, [productId, refreshKey]);
 
   const loadReviews = async () => {
     try {
@@ -24,7 +24,7 @@ export default function ReviewList({ productId, onEdit }) {
   const loadAverage = async () => {
     try {
       const res = await api.get(`/products/${productId}/reviews/average`);
-      setAverage(res.data.average);
+      setAverage(Number( res.data.average_rating)||0);
     } catch (error) {
       console.error(error);
     }
