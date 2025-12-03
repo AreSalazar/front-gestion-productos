@@ -150,13 +150,6 @@ export default function ProductDetail() {
                     Eliminar
                   </button>
 
-                  <button
-                    onClick={() => navigate(`/productos`)}
-                    className="btn btn-outline-primary px-4 py-2 fw-semibold"
-                  >
-                    Volver
-                  </button>
-
                 </div>
 
               </div>
